@@ -1,0 +1,278 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grupo X - Loja Virtual</title>
+    <style>
+        /* Reset e Estilos Globais */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        /* Header */
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Banner Principal */
+        .hero {
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://via.placeholder.com/1920x600');
+            height: 400px;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: white;
+        }
+        
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        
+        /* Produtos */
+        .products {
+            padding: 2rem;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .product-card {
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            height: 200px;
+            background-color: #eee;
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .product-info {
+            padding: 1rem;
+        }
+        
+        .product-price {
+            color: #e74c3c;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .product-button {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-links a {
+            color: white;
+            margin: 0 1rem;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">Grupo X</div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="produtos.html">Produtos</a></li>
+                <li><a href="sobre.html">Sobre Nós</a></li>
+                <li><a href="contato.html">Contato</a></li>
+                <li><a href="carrinho.html">Carrinho (0)</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <!-- Banner Principal -->
+    <section class="hero">
+        <h1>Bem-vindo à nossa Loja Virtual</h1>
+        <p>Os melhores produtos com os menores preços</p>
+        <button>Ver Ofertas</button>
+    </section>
+    
+    <!-- Destaques -->
+    <section class="products">
+        <h2 class="section-title">Produtos em Destaque</h2>
+        <div class="product-grid">
+            <!-- Produto 1 -->
+            <div class="product-card">
+                <div class="product-image" style="background-image: url('https://via.placeholder.com/300');"></div>
+                <div class="product-info">
+                    <h3>Nome do Produto 1</h3>
+                    <p class="product-price">R$ 99,90</p>
+                    <p>Descrição breve do produto</p>
+                    <a href="https://wa.me/1234567890?text=Quero%20comprar%20o%20Produto%201" class="product-button">Comprar via WhatsApp</a>
+                </div>
+            </div>
+            
+            <!-- Produto 2 -->
+            <div class="product-card">
+                <div class="product-image" style="background-image: url('https://via.placeholder.com/300');"></div>
+                <div class="product-info">
+                    <h3>Nome do Produto 2</h3>
+                    <p class="product-price">R$ 149,90</p>
+                    <p>Descrição breve do produto</p>
+                    <a href="https://wa.me/1234567890?text=Quero%20comprar%20o%20Produto%202" class="product-button">Comprar via WhatsApp</a>
+                </div>
+            </div>
+            
+            <!-- Produto 3 -->
+            <div class="product-card">
+                <div class="product-image" style="background-image: url('https://via.placeholder.com/300');"></div>
+                <div class="product-info">
+                    <h3>Nome do Produto 3</h3>
+                    <p class="product-price">R$ 79,90</p>
+                    <p>Descrição breve do produto</p>
+                    <a href="https://wa.me/1234567890?text=Quero%20comprar%20o%20Produto%203" class="product-button">Comprar via WhatsApp</a>
+                </div>
+            </div>
+            
+            <!-- Produto 4 -->
+            <div class="product-card">
+                <div class="product-image" style="background-image: url('https://via.placeholder.com/300');"></div>
+                <div class="product-info">
+                    <h3>Nome do Produto 4</h3>
+                    <p class="product-price">R$ 199,90</p>
+                    <p>Descrição breve do produto</p>
+                    <a href="https://wa.me/1234567890?text=Quero%20comprar%20o%20Produto%204" class="product-button">Comprar via WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="footer-links">
+            <a href="politica.html">Política de Privacidade</a>
+            <a href="trocas.html">Trocas e Devoluções</a>
+            <a href="duvidas.html">Dúvidas Frequentes</a>
+        </div>
+        <p>© 2023 Grupo X. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>
